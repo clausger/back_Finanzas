@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .models import Ingreso, Gasto
+from .models import Ingreso, Gasto, Proyecto
 from .serializers import IngresoSerializer, GastoSerializer, ProyectoSerializer
 
 class IngresoViewSet(viewsets.ModelViewSet):
