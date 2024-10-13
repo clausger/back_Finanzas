@@ -41,6 +41,5 @@ class Proyecto(models.Model):
     ingresos_proyectados = models.ManyToManyField(IngresoProyectado, related_name='proyectos')
     roi = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
-
     def __str__(self):
         return self.nombre
