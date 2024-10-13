@@ -28,7 +28,7 @@ class Gasto(models.Model):
 
 class IngresoProyectado(models.Model):
     anio = models.IntegerField()
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    monto = models.DecimalField(max_digits=20, decimal_places=8)
 
     def __str__(self):
         return f"Año {self.anio}: {self.monto}"
