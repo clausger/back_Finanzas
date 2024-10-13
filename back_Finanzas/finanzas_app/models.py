@@ -13,7 +13,6 @@ class Ingreso(models.Model):
     def __str__(self):
         return f"{self.description} - {self.amount}"
 
-
 class Gasto(models.Model):
     id = models.AutoField(primary_key=True)  # Campo 'id' añadido
     description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
