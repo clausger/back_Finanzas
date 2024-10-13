@@ -17,15 +17,26 @@ class ProyectoViewSet(viewsets.ModelViewSet):
     queryset = Proyecto.objects.all()
     serializer_class = ProyectoSerializer
 
-# Vista personalizada para obtener las sumas de ingresos y gastos
-class ResumenFinancieroView(APIView):
+class ResumenFinancieroCompletoView(APIView):
     """
-    API personalizada que devuelve la suma total de ingresos y gastos.
+    API personalizada que devuelve:
+    1. La suma de 'Costo Total' de todos los proyectos.
+    2. La suma de todos los ingresos con 'tipo_ingreso == Recurrente'.
+    3. La suma de todos los gastos con 'type == Recurrente'.
     """
+    
     def get(self, request, format=None):
-        total_ingresos = Ingreso.objects.aggregate(Sum('monto'))['monto__sum'] or 0
-        total_gastos = Gasto.objects.aggregate(Sum('monto'))['monto__sum'] or 0
+        # 1. Suma del costo total en todos los proyectos
+        total_costo_proyectos = Proyecto.objects.aggregate(Sum('costo_total'))['costo_total__sum'] or 0
+        
+        # 2. Suma de todos los ingresos donde 'tipo_ingreso' es Recurrente
+        total_ingresos_recurrentes = Ingreso.objects.filter(tipo_ingreso="Recurrente").aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        # 3. Suma de todos los gastos donde 'type' es Recurrente
+        total_gastos_recurrentes = Gasto.objects.filter(type="Recurrente").aggregate(Sum('amount'))['amount__sum'] or 0
+        
         return Response({
-            'ingresos': total_ingresos,
-            'gastos': total_gastos,
+            'total_costo_proyectos': total_costo_proyectos,
+            'total_ingresos_recurrentes': total_ingresos_recurrentes,
+            'total_gastos_recurrentes': total_gastos_recurrentes,
         })
