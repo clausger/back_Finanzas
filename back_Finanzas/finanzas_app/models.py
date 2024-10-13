@@ -1,30 +1,32 @@
 from django.db import models
 
 class Ingreso(models.Model):
-    descripcion = models.CharField(max_length=255)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha = models.DateTimeField(auto_now_add=True)
-    categoria = models.CharField(max_length=100)
-    fuente = models.CharField(max_length=100)
-    metodo_pago = models.CharField(max_length=100, null=True, blank=True)  # paymentMethod
-    nota = models.TextField(null=True, blank=True)  # note
-    tipo_ingreso = models.CharField(max_length=100, null=True, blank=True)  # incomeType
+    id = models.AutoField(primary_key=True)  # Campo 'id' añadido
+    description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
+    date = models.DateTimeField(auto_now_add=True)  # Cambiado de 'fecha' a 'date'
+    category = models.CharField(max_length=100)
+    paymentMethod = models.CharField(max_length=100, null=True, blank=True)  
+    note = models.TextField(null=True, blank=True)
+    tipo_ingreso = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.descripcion} - {self.monto}"
+        return f"{self.description} - {self.amount}"
+
 
 class Gasto(models.Model):
-    descripcion = models.CharField(max_length=255)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
-    categoria = models.CharField(max_length=100)
-    fecha = models.DateTimeField(auto_now_add=True)
-    destino = models.CharField(max_length=100)
-    tipo = models.CharField(max_length=100, null=True, blank=True)  # type
-    metodo_pago = models.CharField(max_length=100, null=True, blank=True)  # paymentMethod
-    nota = models.TextField(null=True, blank=True)  # note
+    id = models.AutoField(primary_key=True)  # Campo 'id' añadido
+    description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
+    category = models.CharField(max_length=100)
+    date = models.DateTimeField(auto_now_add=True)  # Cambiado de 'fecha' a 'date'
+    type = models.CharField(max_length=100, null=True, blank=True)  # Campo 'type' añadido
+    paymentMethod = models.CharField(max_length=100, null=True, blank=True)  # Campo 'paymentMethod' añadido
+    note = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.descripcion} - {self.monto}"
+        return f"{self.description} - {self.amount}"
+
 
 class FuenteFinanciacion(models.Model):
     tipo = models.CharField(max_length=100)
