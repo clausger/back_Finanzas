@@ -38,7 +38,6 @@ class Proyecto(models.Model):
     descripcion = models.TextField()
     costo_total = models.DecimalField(max_digits=15,decimal_places=2)
     duracion = models.IntegerField(help_text="Duración en días")
-    fecha_inicio = models.DateField()
     ingresos_proyectados = models.ManyToManyField(IngresoProyectado, related_name='proyectos')
     roi = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
