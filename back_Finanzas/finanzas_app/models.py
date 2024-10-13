@@ -4,7 +4,7 @@ class Ingreso(models.Model):
     id = models.AutoField(primary_key=True)  # Campo 'id' añadido
     description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
-    date = models.DateTimeField(auto_now_add=True)  # Cambiado de 'fecha' a 'date'
+    date = models.DateTimeField()  # El usuario ingresa la fecha
     category = models.CharField(max_length=100)
     paymentMethod = models.CharField(max_length=100, null=True, blank=True)  
     note = models.TextField(null=True, blank=True)
@@ -19,7 +19,7 @@ class Gasto(models.Model):
     description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
     category = models.CharField(max_length=100)
-    date = models.DateTimeField(auto_now_add=True)  # Cambiado de 'fecha' a 'date'
+    date = models.DateTimeField()  # El usuario ingresa la fecha
     type = models.CharField(max_length=100, null=True, blank=True)  # Campo 'type' añadido
     paymentMethod = models.CharField(max_length=100, null=True, blank=True)  # Campo 'paymentMethod' añadido
     note = models.TextField(null=True, blank=True)
