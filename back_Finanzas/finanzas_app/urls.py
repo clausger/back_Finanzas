@@ -9,6 +9,5 @@ router.register(r'proyectos',ProyectoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('resumen-financiero-completo/', ResumenFinancieroCompletoView.as_view(), name='resumen-financiero-completo'),
-
+    path('resumen/', ResumenFinancieroCompletoView.as_view(), name='resumen-financiero-completo'),
 ]
