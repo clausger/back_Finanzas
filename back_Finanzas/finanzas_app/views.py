@@ -35,8 +35,10 @@ class ResumenFinancieroCompletoView(APIView):
         # 3. Suma de todos los gastos donde 'type' es Recurrente
         total_gastos_recurrentes = Gasto.objects.filter(type="Recurrente").aggregate(Sum('amount'))['amount__sum'] or 0
         
+        balance = total_ingresos_recurrentes - total_gastos_recurrentes
         return Response({
             'total_costo_proyectos': total_costo_proyectos,
             'total_ingresos_recurrentes': total_ingresos_recurrentes,
             'total_gastos_recurrentes': total_gastos_recurrentes,
+            'total_balance':balance,
         })

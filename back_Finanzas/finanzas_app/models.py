@@ -34,12 +34,15 @@ class IngresoProyectado(models.Model):
         return f"Año {self.anio}: {self.monto}"
 
 class Proyecto(models.Model):
+    id = models.AutoField(primary_key=True) 
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
-    costo_total = models.DecimalField(max_digits=15,decimal_places=2)
+    costo_total = models.DecimalField(max_digits=15, decimal_places=2)
     duracion = models.IntegerField(help_text="Duración en días")
     ingresos_proyectados = models.ManyToManyField(IngresoProyectado, related_name='proyectos')
     roi = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    payback = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    total_ingresos = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
