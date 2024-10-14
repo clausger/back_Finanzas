@@ -21,13 +21,14 @@ class ProyectoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proyecto
-        fields = ['nombre', 'descripcion', 'costo_total', 'duracion', 'ingresos_proyectados', 'roi'] 
+        fields = ['id','nombre', 'descripcion', 'costo_total', 'duracion', 'ingresos_proyectados', 'roi'] 
 
     def create(self, validated_data):
         ingresos_data = validated_data.pop('ingresos_proyectados', [])
         proyecto = Proyecto.objects.create(**validated_data)
 
         for ingreso_data in ingresos_data:
-            IngresoProyectado.objects.create(**ingreso_data, proyectos=proyecto)  # Agregar la relación ManyToMany
+            ingreso = IngresoProyectado.objects.create(**ingreso_data)  # Crea cada IngresoProyectado
+            proyecto.ingresos_proyectados.add(ingreso)  # Agrega el ingreso al proyecto
 
         return proyecto
