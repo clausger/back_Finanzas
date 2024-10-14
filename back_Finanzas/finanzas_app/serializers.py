@@ -21,7 +21,7 @@ class ProyectoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proyecto
-        fields = ['id','nombre', 'descripcion', 'costo_total', 'duracion', 'ingresos_proyectados', 'roi'] 
+        fields = ['id', 'nombre', 'descripcion', 'costo_total', 'duracion', 'ingresos_proyectados', 'roi', 'payback', 'total_ingresos']
 
     def create(self, validated_data):
         ingresos_data = validated_data.pop('ingresos_proyectados', [])
