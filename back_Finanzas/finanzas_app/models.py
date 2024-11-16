@@ -1,10 +1,10 @@
 from django.db import models
 
 class Ingreso(models.Model):
-    id = models.AutoField(primary_key=True)  # Campo 'id' añadido
-    description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
-    date = models.DateTimeField()  # El usuario ingresa la fecha
+    id = models.AutoField(primary_key=True) 
+    description = models.CharField(max_length=255) 
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  
+    date = models.DateTimeField()
     category = models.CharField(max_length=100)
     paymentMethod = models.CharField(max_length=100, null=True, blank=True)  
     note = models.TextField(null=True, blank=True)
@@ -14,13 +14,13 @@ class Ingreso(models.Model):
         return f"{self.description} - {self.amount}"
 
 class Gasto(models.Model):
-    id = models.AutoField(primary_key=True)  # Campo 'id' añadido
-    description = models.CharField(max_length=255)  # Cambiado de 'descripcion' a 'description'
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Cambiado de 'monto' a 'amount'
+    id = models.AutoField(primary_key=True)  
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  
     category = models.CharField(max_length=100)
-    date = models.DateTimeField()  # El usuario ingresa la fecha
-    type = models.CharField(max_length=100, null=True, blank=True)  # Campo 'type' añadido
-    paymentMethod = models.CharField(max_length=100, null=True, blank=True)  # Campo 'paymentMethod' añadido
+    date = models.DateTimeField() 
+    type = models.CharField(max_length=100, null=True, blank=True) 
+    paymentMethod = models.CharField(max_length=100, null=True, blank=True) 
     note = models.TextField(null=True, blank=True)
 
     def __str__(self):

@@ -28,7 +28,7 @@ class ProyectoSerializer(serializers.ModelSerializer):
         proyecto = Proyecto.objects.create(**validated_data)
 
         for ingreso_data in ingresos_data:
-            ingreso = IngresoProyectado.objects.create(**ingreso_data)  # Crea cada IngresoProyectado
-            proyecto.ingresos_proyectados.add(ingreso)  # Agrega el ingreso al proyecto
+            ingreso = IngresoProyectado.objects.create(**ingreso_data)
+            proyecto.ingresos_proyectados.add(ingreso)  
 
         return proyecto

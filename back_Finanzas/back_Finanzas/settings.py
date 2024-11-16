@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True  # Permite todas las solicitudes
+CORS_ORIGIN_ALLOW_ALL = True  
 
 
 ROOT_URLCONF = 'back_Finanzas.urls'
