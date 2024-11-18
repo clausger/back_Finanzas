@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .models import Ingreso, Gasto, Proyecto
-from .serializers import IngresoSerializer, GastoSerializer, ProyectoSerializer
+from .serializers import BalanceSerializer, IngresoSerializer, GastoSerializer, ProyectoSerializer
 from rest_framework.views import APIView
 from django.db.models import Sum
 from rest_framework.response import Response 
@@ -9,9 +9,32 @@ class IngresoViewSet(viewsets.ModelViewSet):
     queryset = Ingreso.objects.all()
     serializer_class = IngresoSerializer
 
+class BalanceViewSet(viewsets.ViewSet):
+    def list(self, request):
+        total_ingresos = Ingreso.objects.aggregate(total=Sum('amount'))['total'] or 0
+        total_gastos = Gasto.objects.aggregate(total=Sum('amount'))['total'] or 0
+        total_inversiones = Ingreso.objects.filter(tipo_ingreso='Inversion').aggregate(total=Sum('amount'))['total'] or 0
+
+        balance_data = {
+            'total_ingresos': total_ingresos,
+            'total_gastos': total_gastos,
+            'total_inversiones': total_inversiones,
+            'neto': total_ingresos - total_gastos,
+        }
+
+        serializer = BalanceSerializer(balance_data)
+        return Response(serializer.data)
+
 class GastoViewSet(viewsets.ModelViewSet):
     queryset = Gasto.objects.all()
     serializer_class = GastoSerializer
+
+class InversionViewSet(viewsets.ModelViewSet):
+    serializer_class = IngresoSerializer
+
+    def get_queryset(self):
+        return Ingreso.objects.filter(tipo_ingreso='Inversion')
+
 
 class ProyectoViewSet(viewsets.ModelViewSet):
     queryset = Proyecto.objects.all()
