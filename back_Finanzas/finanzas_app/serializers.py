@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import Ingreso, Gasto, IngresoProyectado, Proyecto
 
+class BalanceSerializer(serializers.Serializer):
+    total_ingresos = serializers.DecimalField(max_digits=15, decimal_places=2)
+    total_gastos = serializers.DecimalField(max_digits=15, decimal_places=2)
+    neto = serializers.DecimalField(max_digits=15, decimal_places=2)
+    
 class IngresoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingreso
