@@ -1,4 +1,4 @@
-from back_Finanzas.core_connector.connector import iniciar_consumidor, enviar_mensaje, cerrar_conexiones
+from back_Finanzas.core_connector.connector import iniciar_consumidor, enviar_mensaje, cerrar_consumidor
 from sender import Modules, Types
 
 # Define la clase Usuario
@@ -19,6 +19,3 @@ mensaje_prueba = Usuario(nombre="Matias")
 
 # Envía el mensaje usando Types.JSON.value o "JSON" si .value no está disponible
 enviar_mensaje(Modules.GESTION_FINANCIERA.value, Modules.GESTION_FINANCIERA.value, mensaje_prueba, 'Prueba', Types.JSON.value)
-
-# Cierra las conexiones
-cerrar_conexiones()
