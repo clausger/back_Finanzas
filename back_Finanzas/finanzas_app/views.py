@@ -4,6 +4,7 @@ from .serializers import IngresoSerializer, GastoSerializer, ProyectoSerializer
 from rest_framework.views import APIView
 from django.db.models import Sum
 from rest_framework.response import Response 
+from django.http import JsonResponse
 
 class IngresoViewSet(viewsets.ModelViewSet):
     queryset = Ingreso.objects.all()
@@ -42,3 +43,6 @@ class ResumenFinancieroCompletoView(APIView):
             'total_gastos_recurrentes': total_gastos_recurrentes,
             'total_balance':balance,
         })
+    
+def ping(request):
+    return JsonResponse({'message': 'Pong'})
