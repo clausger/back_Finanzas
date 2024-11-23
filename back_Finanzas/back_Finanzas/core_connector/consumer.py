@@ -1,6 +1,5 @@
 import sender
 from sender import convert_body
-from core_connector.connector import iniciar_consumidor
 import json
 
 def procesar_mensaje(ch, method, properties, body):

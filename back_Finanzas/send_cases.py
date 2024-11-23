@@ -1,43 +1,75 @@
 import os
 import django
+import requests
+
+from sender import *
 
 # Configura el entorno de Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'back_Finanzas.settings')  # Cambia esto si el nombre de tu proyecto es diferente
-django.setup()
+#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'back_Finanzas.settings')  # Cambia esto si el nombre de tu proyecto es diferente
+#django.setup()
 
 # Ahora puedes importar los modelos y funciones
-from finanzas_app import models
-from finanzas_app.models import Ingreso, Gasto
+#from finanzas_app.models import Ingreso, Gasto
 from back_Finanzas.core_connector.connector import enviar_mensaje
-from sender import Modules, Types
-from django.db.models import Sum
+import sender
+#from django.db.models import Sum
 
-# Clase para representar los mensajes
-class Mensaje:
-    def __init__(self, usecase, payload, target):
-        self.usecase = usecase
-        self.payload = payload
-        self.target = target
-
-    def to_dict(self):
-        return {
-            "usecase": self.usecase,
-            "payload": self.payload,
-            "target": self.target
-        }
-
-# Funciones de obtención de datos (las mismas que definiste antes)
+# Funciones de obtención de datos
 def obtener_todas_inversiones():
-    return list(Ingreso.objects.filter(category="Inversión").values())
+
+    api_url = "https://back-finanzas.onrender.com/api/ingresos/"
+
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
+
+        data = response.json()
+
+        inversiones = [
+            float(ingreso["amount"]) for ingreso in data if ingreso.get("category") == "Inversiones"
+        ]
+
+        return inversiones
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error al conectar con la API: {e}")
+        return []
+
 
 def obtener_inversiones_usuario(username):
-    return list(Ingreso.objects.filter(category="Inversión", note=username).values())
+    #return list(Ingreso.objects.filter(category="Inversión", note=username).values())
+    return {'numero':'0'}
 
 def obtener_balance_general():
-    total_ingresos = Ingreso.objects.aggregate(total=Sum("amount"))["total"] or 0
-    total_gastos = Gasto.objects.aggregate(total=Sum("amount"))["total"] or 0
-    balance = total_ingresos - total_gastos
-    return {"total_ingresos": total_ingresos, "total_gastos": total_gastos, "balance": balance}
+
+    api_url = "https://back-finanzas.onrender.com/api/resumen/"
+
+    try:
+
+        response = requests.get(api_url)
+        response.raise_for_status()  # Lanza una excepción si ocurre un error
+
+
+        data = response.json()
+
+
+        total_ingresos = data.get("total_ingresos_recurrentes", 0)
+        total_gastos = data.get("total_gastos_recurrentes", 0)
+        balance_general = data.get("total_balance", 0)
+
+
+        return {
+            "total_ingresos": total_ingresos,
+            "total_gastos": total_gastos,
+            "balance_general": balance_general
+        }
+    except requests.exceptions.RequestException as e:
+        print(f"Error al obtener el balance general desde la API: {e}")
+        return {
+            "total_ingresos": 0,
+            "total_gastos": 0,
+            "balance_general": 0
+        }
 
 # Obtener datos
 todas_inversiones = obtener_todas_inversiones()
@@ -46,24 +78,21 @@ balance_general = obtener_balance_general()
 
 # Define los casos de uso
 casos = [
-    Mensaje(usecase="Inversiones", payload=todas_inversiones, target=None),
-    Mensaje(usecase="Inversiones", payload=inversiones_usuario, target="juan.perez"),
-    Mensaje(usecase="Balance", payload=balance_general, target=None),
+    {"usecase": "Inversiones", "payload": todas_inversiones, "target": None},
+    {"usecase": "Inversiones", "payload": inversiones_usuario, "target": "juan.perez"},
+    {"usecase": "Balance", "payload": balance_general, "target": None},
 ]
 
 # Enviar cada caso de uso
 for caso in casos:
     try:
         enviar_mensaje(
-            origen=Modules.GESTION_FINANCIERA.value,
-            destino=Modules.USUARIO.value,
-            mensaje=caso,
-            caso_uso=caso.usecase,
-            tipo_dato=Types.JSON.value,
-            target=caso.target or "",
-            status="200",
-            user="default_user"
+            Modules.GESTION_FINANCIERA.value,  # Origen
+            Modules.USUARIO.value,  # Destino
+            caso["payload"],                             # Mensaje
+            caso["usecase"],                  # Caso de uso
+            Types.ARRAY.value                 # Tipo de dato
         )
-        print(f"Mensaje enviado para el caso de uso: {caso.usecase}")
+        print(f"Mensaje enviado para el caso de uso: {caso['usecase']}")
     except Exception as e:
-        print(f"Error al enviar el mensaje para {caso.usecase}: {e}")
+        print(f"Error al enviar el mensaje para {caso['usecase']}: {e}")

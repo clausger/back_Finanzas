@@ -9,6 +9,7 @@ class Ingreso(models.Model):
     paymentMethod = models.CharField(max_length=100, null=True, blank=True)  
     note = models.TextField(null=True, blank=True)
     tipo_ingreso = models.CharField(max_length=100, null=True, blank=True)
+    usuario = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return f"{self.description} - {self.amount}"
@@ -22,6 +23,7 @@ class Gasto(models.Model):
     type = models.CharField(max_length=100, null=True, blank=True) 
     paymentMethod = models.CharField(max_length=100, null=True, blank=True) 
     note = models.TextField(null=True, blank=True)
+    usuario = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return f"{self.description} - {self.amount}"

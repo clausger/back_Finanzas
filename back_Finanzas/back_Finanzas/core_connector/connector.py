@@ -16,7 +16,7 @@ def new_callback(ch, method, properties, body):
         message = convert_body(body)
 
         # Extrae el caso de uso y otros datos
-        usecase = message.get("usecase")
+        usecase = message.get("case")
         payload = message.get("payload")
         target = message.get("target")
 
@@ -57,9 +57,10 @@ def iniciar_consumidor():
         print(f"Error al iniciar el consumidor: {e}")
 
 # Función para enviar mensajes
-def enviar_mensaje(origen, destino, mensaje, caso_uso, tipo_dato="JSON", target="", status="600", user="default_user"):
+def enviar_mensaje(origen, destino, mensaje, caso_uso, tipo_dato="JSON", target="", status="600", user="gestion_financiera"):
     try:
-        mensaje_json = convert_class(mensaje)
+        #mensaje_json = convert_class(mensaje)
+        mensaje_json = mensaje
         publish(pool_connections[1], mensaje_json, origen, destino, caso_uso, TOKEN, tipo_dato, target, status, user)
         print(f"Mensaje enviado: {mensaje_json}")
     except Exception as e:
