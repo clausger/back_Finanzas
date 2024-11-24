@@ -37,8 +37,31 @@ def obtener_todas_inversiones():
 
 
 def obtener_inversiones_usuario(username):
-    #return list(Ingreso.objects.filter(category="Inversión", note=username).values())
-    return {'numero':'0'}
+
+    api_url = "https://back-finanzas.onrender.com/api/ingresos/"
+
+    try:
+        # Realizar la solicitud GET a la API
+        response = requests.get(api_url)
+        response.raise_for_status()  # Asegurarse de que no hubo errores en la solicitud
+
+        # Convertir la respuesta a formato JSON
+        data = response.json()
+
+        # Filtrar solo los ingresos que son inversiones y pertenecen al usuario
+        inversiones = [
+            float(ingreso["amount"])
+            for ingreso in data
+            if ingreso.get("category") == "Inversiones" and ingreso.get("usuario") == username
+        ]
+
+        # Retornar las inversiones del usuario
+        return inversiones
+
+    except requests.exceptions.RequestException as e:
+        # Manejar errores de conexión o solicitud
+        print(f"Error al conectar con la API: {e}")
+        return []
 
 def obtener_balance_general():
 
@@ -65,11 +88,6 @@ def obtener_balance_general():
         }
     except requests.exceptions.RequestException as e:
         print(f"Error al obtener el balance general desde la API: {e}")
-        return {
-            "total_ingresos": 0,
-            "total_gastos": 0,
-            "balance_general": 0
-        }
 
 # Obtener datos
 todas_inversiones = obtener_todas_inversiones()
@@ -86,13 +104,7 @@ casos = [
 # Enviar cada caso de uso
 for caso in casos:
     try:
-        enviar_mensaje(
-            Modules.GESTION_FINANCIERA.value,  # Origen
-            Modules.USUARIO.value,  # Destino
-            caso["payload"],                             # Mensaje
-            caso["usecase"],                  # Caso de uso
-            Types.ARRAY.value                 # Tipo de dato
-        )
+
         print(f"Mensaje enviado para el caso de uso: {caso['usecase']}")
     except Exception as e:
         print(f"Error al enviar el mensaje para {caso['usecase']}: {e}")
