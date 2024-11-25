@@ -14,6 +14,8 @@ pool_connections = [
     start_connection(HOST, PORT, USER, PASSWORD)
 ]
 
+
+
 # Función callback para procesar mensajes recibidos
 def new_callback(ch, method, properties, body):
     try:
@@ -170,8 +172,8 @@ def new_callback(ch, method, properties, body):
                     "amount": data.get('montoVentas'),  # Monto del payload
                     "date": data.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
                     "category": "Ventas",
-                    "paymentMethod": None,
-                    "note": None,
+                    "paymentMethod": "Otro",
+                    "note": "Ingreso autogenerado desde E-Commerce",
                     "tipo_ingreso": "Recurrente",
                     "usuario": None
                 }
@@ -183,8 +185,8 @@ def new_callback(ch, method, properties, body):
                     "amount": data.get('montoCompras'),  # Monto del payload
                     "date": data.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
                     "category": "Compras",
-                    "paymentMethod": None,
-                    "note": None,
+                    "paymentMethod": "Otro",
+                    "note": "Gasto autogenerado desde E-Commerce",
                     "type": "Recurrente",
                     "usuario": None
                 }
