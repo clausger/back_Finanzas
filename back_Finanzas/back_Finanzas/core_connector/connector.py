@@ -1,8 +1,9 @@
 from datetime import datetime
-
+import json
 import requests
 import sender
-from sender import start_connection, start_consumer, publish, close_connection, convert_class, convert_body, convert_payload, Types, Modules
+from sender import start_connection, start_consumer, publish, close_connection, convert_class, convert_body, \
+    convert_payload, Types, Modules, convert_array
 from .config import HOST, PORT, USER, PASSWORD, TOKEN
 import sqlite3
 
@@ -17,43 +18,50 @@ pool_connections = [
 def new_callback(ch, method, properties, body):
     try:
         # Convierte el cuerpo del mensaje a JSON
+        print(f"BODY: {body}")
         message = convert_body(body)
+        print(f"MESSAGE: {message}")
 
         # Extrae el caso de uso y otros datos
-        usecase = message.get("case")
+        usecase = message.get("useCase")
         payload = message.get("payload")
         target = message.get("target")
+
+        print(usecase)
 
         # Maneja los diferentes casos de uso
         if usecase == "Balance":
             balance_general = obtener_balance_general()
-            print(f"[Balance] Enviando balance: {payload}")
+            print(f"[Balance] Enviando balance: {balance_general}")
             try:
                 enviar_mensaje(
                     Modules.GESTION_FINANCIERA.value,  # Origen
-                    Modules.GESTION_FINANCIERA.value,  # Destino
+                    Modules.USUARIO.value,  # Destino
                     balance_general,  # Mensaje
-                    usecase,  # Caso de uso
-                    Types.ARRAY.value  # Tipo de dato
+                    "Balance",  # Caso de uso
+                    Types.JSON.value,  # Tipo de dato
+                    ""
                 )
                 print(f"[Balance] Enviando balance calculado: {balance_general}")
             except Exception as e:
                 print(f"Error al enviar el mensaje para {usecase}: {e}")
 
         elif usecase == "Inversion":
-            print(f"[Inversion] Guardando inversión: {payload} para usuario: {payload.get('username')}")
+            data = json.loads(payload)
+
+            print(f"[Inversion] Guardando inversión: {payload}")
             try:
                 api_url="https://back-finanzas.onrender.com/api/ingresos/"
 
                 nuevo_ingreso = {
-                    "description": "Inversion",
-                    "amount": payload.get('monto'),  # Monto del payload
-                    "date": payload.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
+                    "description": "Inversion Usuario",
+                    "amount": data.get('amount'),  # Monto del payload
+                    "date": data.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
                     "category": "Inversiones",
                     "paymentMethod": None,
-                    "note": None,
+                    "note": data.get('note'),
                     "tipo_ingreso": "Único",
-                    "usuario": payload.get('username'),  # Usuario objetivo del mensaje
+                    "usuario": target,  # Usuario objetivo del mensaje
                 }
 
                 print(nuevo_ingreso)
@@ -68,32 +76,82 @@ def new_callback(ch, method, properties, body):
 
 
         elif usecase == "Inversiones":
-            if payload:  # Si se solicita inversiones de un usuario específico
-                inversiones = obtener_inversiones_usuario(username=payload.get("username"))
-                print(f"[Balance] Enviando inversiones del usuario: {payload}")
-                try:
-                    enviar_mensaje(
-                        Modules.GESTION_FINANCIERA.value,  # Origen
-                        Modules.GESTION_FINANCIERA.value,  # Destino
-                        inversiones,  # Mensaje
-                        usecase,  # Caso de uso
-                        Types.ARRAY.value  # Tipo de dato
-                    )
+            if payload is not None:  # Si se solicita inversiones de un usuario específico
+                inversiones = obtener_inversiones_usuario(payload)
+                print(f"[Inversion] Enviando inversiones del usuario: {payload}")
+                print("Inversiones: ",inversiones)
+                if len(inversiones) == 1:
 
-                except Exception as e:
-                    print(f"Error al enviar el mensaje para {usecase}: {e}")
-
-
-                else:  # Si se solicitan todas las inversiones
-                    inversiones = obtener_todas_inversiones()
-                    print(f"[Balance] Enviando todas las inversiones:")
                     try:
                         enviar_mensaje(
                             Modules.GESTION_FINANCIERA.value,  # Origen
-                            Modules.GESTION_FINANCIERA.value,  # Destino
+                            Modules.USUARIO.value,  # Destino
+                            inversiones[0],  # Mensaje
+                            usecase,  # Caso de uso
+                            Types.JSON.value,  # Tipo de dato
+                            payload,
+
+                        )
+
+                    except Exception as e:
+                        print(f"Error al enviar el mensaje para {usecase}: {e}")
+
+                elif len(inversiones) == 0:
+
+                    try:
+                        enviar_mensaje(
+                            Modules.GESTION_FINANCIERA.value,  # Origen
+                            Modules.USUARIO.value,  # Destino
                             inversiones,  # Mensaje
                             usecase,  # Caso de uso
-                            Types.ARRAY.value  # Tipo de dato
+                            Types.JSON.value,  # Tipo de dato
+                            "Error",
+                        )
+
+                    except Exception as e:
+                        print(f"Error al enviar el mensaje para {usecase}: {e}")
+                else:
+                    try:
+                        enviar_mensaje(
+                            Modules.GESTION_FINANCIERA.value,  # Origen
+                            Modules.USUARIO.value,  # Destino
+                            inversiones,  # Mensaje
+                            usecase,  # Caso de uso
+                            Types.ARRAY.value,# Tipo de dato
+                            payload
+                        )
+
+                    except Exception as e:
+                        print(f"Error al enviar el mensaje para {usecase}: {e}")
+
+
+            else:  # Si se solicitan todas las inversiones
+                inversiones = obtener_todas_inversiones()
+                print(f"[Balance] Enviando todas las inversiones:")
+                if len(inversiones) == 1:
+
+                    try:
+                        enviar_mensaje(
+                            Modules.GESTION_FINANCIERA.value,  # Origen
+                            Modules.USUARIO.value,  # Destino
+                            inversiones[0],  # Mensaje
+                            usecase,  # Caso de uso
+                            Types.JSON.value,
+                            ""# Tipo de dato
+                        )
+
+                    except Exception as e:
+                        print(f"Error al enviar el mensaje para {usecase}: {e}")
+
+                else:
+                    try:
+                        enviar_mensaje(
+                            Modules.GESTION_FINANCIERA.value,  # Origen
+                            Modules.USUARIO.value,  # Destino
+                            inversiones,  # Mensaje
+                            usecase,  # Caso de uso
+                            Types.ARRAY.value,# Tipo de dato
+                            payload
                         )
 
                     except Exception as e:
@@ -102,14 +160,15 @@ def new_callback(ch, method, properties, body):
 
         elif usecase == "balance":
             print(f"[Balance E-Commerce] Mensaje recibido con payload: {payload} y target: {target}")
+            data = json.loads(payload)
             try:
                 api_ingresos = "https://back-finanzas.onrender.com/api/ingresos/"
                 api_gastos = "https://back-finanzas.onrender.com/api/gastos/"
 
                 nuevo_ingreso = {
                     "description": "Ventas E-Commerce",
-                    "amount": payload.get('montoVentas'),  # Monto del payload
-                    "date": payload.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
+                    "amount": data.get('montoVentas'),  # Monto del payload
+                    "date": data.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
                     "category": "Ventas",
                     "paymentMethod": None,
                     "note": None,
@@ -121,12 +180,12 @@ def new_callback(ch, method, properties, body):
 
                 nuevo_gasto = {
                     "description": "Compras E-Commerce",
-                    "amount": payload.get('montoCompras'),  # Monto del payload
-                    "date": payload.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
+                    "amount": data.get('montoCompras'),  # Monto del payload
+                    "date": data.get("date", datetime.now().isoformat()),  # Fecha actual si no está en el payload
                     "category": "Compras",
                     "paymentMethod": None,
                     "note": None,
-                    "tipo_ingreso": "Recurrente",
+                    "type": "Recurrente",
                     "usuario": None
                 }
                 print(nuevo_gasto)
@@ -139,7 +198,7 @@ def new_callback(ch, method, properties, body):
 
 
                 print(f"[Inversion] Ingreso guardado exitosamente: {response_ingresos.json()}")
-                print(f"[Inversion] Ingreso guardado exitosamente: {response_gastos.json()}")
+                print(f"[Inversion] Gasto guardado exitosamente: {response_gastos.json()}")
 
             except requests.exceptions.RequestException as e:
                 print(f"Error al guardar la inversión o gasto: {e}")
@@ -162,11 +221,25 @@ def iniciar_consumidor():
         print(f"Error al iniciar el consumidor: {e}")
 
 # Función para enviar mensajes
-def enviar_mensaje(origen, destino, mensaje, caso_uso, tipo_dato="JSON", target="", status="600", user="gestion_financiera"):
+def enviar_mensaje(origen, destino, mensaje, caso_uso, tipo_dato, target, status="600", user="{user: gestion_financiera, password: M$!2$4$2#&$m!52*3747}"):
+    print("Mensaje en enviar mensaje:",mensaje)
+    print(f"Caso de uso: {caso_uso}. Tipo de dato: {tipo_dato}")
     try:
-        #mensaje_json = convert_class(mensaje)
-        mensaje_json = mensaje
-        publish(pool_connections[1], mensaje_json, origen, destino, caso_uso, TOKEN, tipo_dato, target, status, user)
+        if tipo_dato == Types.JSON.value:
+            mensaje_json = json.dumps(mensaje)
+            #mensaje_json = mensaje
+        else:
+            array = []
+            for i in mensaje:
+                inversion = json.dumps(i)
+                array.append(inversion)
+
+            mensaje_json = convert_array(array)
+
+
+        coneccion = start_connection(HOST,PORT,USER,PASSWORD)
+        publish(coneccion, mensaje_json, origen, destino, caso_uso, TOKEN, tipo_dato, target, status, user)
+        close_connection(coneccion)
         print(f"Mensaje enviado: {mensaje_json}")
 
     except Exception as e:
@@ -234,7 +307,7 @@ def obtener_todas_inversiones():
         data = response.json()
 
         inversiones = [
-            float(ingreso["amount"]) for ingreso in data if ingreso.get("category") == "Inversiones"
+            ingreso for ingreso in data if ingreso.get("category") == "Inversiones"
         ]
 
         return inversiones
@@ -255,13 +328,15 @@ def obtener_inversiones_usuario(username):
 
         # Convertir la respuesta a formato JSON
         data = response.json()
+        print(data)
 
         # Filtrar solo los ingresos que son inversiones y pertenecen al usuario
         inversiones = [
-            float(ingreso["amount"])
+            ingreso
             for ingreso in data
             if ingreso.get("category") == "Inversiones" and ingreso.get("usuario") == username
         ]
+
 
         # Retornar las inversiones del usuario
         return inversiones
@@ -270,3 +345,4 @@ def obtener_inversiones_usuario(username):
         # Manejar errores de conexión o solicitud
         print(f"Error al conectar con la API: {e}")
         return []
+

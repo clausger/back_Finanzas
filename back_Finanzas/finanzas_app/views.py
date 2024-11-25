@@ -30,20 +30,29 @@ La suma de todos los gastos.
 
 
     def get(self, request, format=None):
-        total_costo_proyectos = Proyecto.objects.aggregate(Sum('costo_total'))['costo_total__sum'] or 0
+        try:
+            # Suma de costo total de proyectos
+            total_costo_proyectos = Proyecto.objects.aggregate(Sum('costo_total'))['costo_total__sum'] or 0
 
-        total_ingresos = Ingreso.objects.aggregate(Sum('amount'))['amountsum'] or 0
+            # Suma de ingresos
+            total_ingresos = Ingreso.objects.aggregate(Sum('amount'))['amount__sum'] or 0
 
-        total_gastos = Gasto.objects.aggregate(Sum('amount'))['amountsum'] or 0
+            # Suma de gastos
+            total_gastos = Gasto.objects.aggregate(Sum('amount'))['amount__sum'] or 0
 
-        balance = total_ingresos - total_gastos
+            # Cálculo del balance
+            balance = total_ingresos - total_gastos
 
-        return Response({
-            'total_costo_proyectos': total_costo_proyectos,
-            'total_ingresos_recurrentes': total_ingresos,
-            'total_gastos_recurrentes': total_gastos,
-            'total_balance': balance,
-        })
+            # Respuesta con datos financieros
+            return Response({
+                'total_costo_proyectos': total_costo_proyectos,
+                'total_ingresos_recurrentes': total_ingresos,
+                'total_gastos_recurrentes': total_gastos,
+                'total_balance': balance,
+            })
+        except Exception as e:
+            # Manejo de errores
+            return Response({'error': str(e)}, status=500)
 
 def ping(request):
     return JsonResponse({'message': 'Pong'})
